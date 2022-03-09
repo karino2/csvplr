@@ -2,17 +2,19 @@ module Common
 
 open System
 
-type ValueType =
+type CValueType =
 | Number
 | Float
+| Bool
 | String
 | DateTime
 
-type Value = 
+type CValue = 
 | Number of int
 | Float of float
 | Bool of bool
 | String of string
+| Date of DateTime
 
 
 type Atom =

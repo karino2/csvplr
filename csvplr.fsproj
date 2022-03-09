@@ -7,6 +7,7 @@
     <Compile Include="Common.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="Eval.fs" />
+    <Compile Include="TestUtils.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
