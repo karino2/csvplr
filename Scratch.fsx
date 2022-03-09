@@ -123,3 +123,18 @@ open TestUtils
 let funcall = runParse pexpr "date(date)"
 
 evalRow funcall pollenCsv.Rows[0]
+
+let mutateDf df expr =
+    mutateWithExpr expr df
+
+runParse pAssignment "year=year(date)"
+|> mutateDf pollenCsv
+
+runParse pAssignment "month=month(date)"
+|> mutateDf pollenCsv
+
+runParse pAssignment "day=day(date)"
+|> mutateDf pollenCsv
+
+pollenCsv.SaveCsv("test/test_with_ymd.csv", includeRowKeys=false)
+

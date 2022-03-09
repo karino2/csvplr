@@ -68,12 +68,25 @@ let evalRow (expr:Rexpr) row =
         // No type information, if this is variable, treat as string.
         evalRowT CValueType.String expr
     | Funcall (fid, argexprs) ->
+        let evalAsDate arg =
+            let farg = evalRowT CValueType.DateTime arg
+            match farg with
+            | Date d -> d
+            | _ -> failwith "date related function with non date arg"
+
         match (fid, argexprs) with
         | ("date", onearg::[]) -> 
-            let farg = evalRowT CValueType.DateTime onearg
-            match farg with
-            | Date d -> CValue.String(d.Date.ToString("yyyy-MM-dd"))
-            | _ -> failwith "date function with non date arg"
+            let d = evalAsDate onearg
+            CValue.String(d.Date.ToString("yyyy-MM-dd"))
+        | ("year", onearg::[]) -> 
+            let d = evalAsDate onearg
+            CValue.String(d.Year.ToString())
+        | ("month", onearg::[]) -> 
+            let d = evalAsDate onearg
+            CValue.String(d.Month.ToString())
+        | ("day", onearg::[]) -> 
+            let d = evalAsDate onearg
+            CValue.String(d.Day.ToString())
         | _ -> failwith "NYI4"
  
 
