@@ -33,11 +33,18 @@ pollen012?citycode
 // NG
 pollen012?date
 
-DateTime.Now.ToString()
+DateTime.Now.ToString("yyyy-MM-dd")
 
 
 // add field
 pollenCsv?dateonly <-  pollenCsv |> Frame.mapRowValues (fun row->row.GetAs<DateTime>("date").Date)
+
+
+let series = pollenCsv |> Frame.mapRowValues (fun row->row.GetAs<DateTime>("date").Date)
+
+pollenCsv.AddColumn("dateonly", series)
+pollenCsv
+
 
 pollenCsv
 pollenCsv.ColumnKeys
@@ -109,3 +116,10 @@ eval pexpr "pollen != -9999"
 
 eval pexpr "pollen == 7"
 
+
+#load "TestUtils.fs"
+open TestUtils
+
+let funcall = runParse pexpr "date(date)"
+
+evalRow funcall pollenCsv.Rows[0]

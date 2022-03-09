@@ -67,8 +67,15 @@ let evalRow (expr:Rexpr) row =
     | Atom _ ->
         // No type information, if this is variable, treat as string.
         evalRowT CValueType.String expr
-    | _ -> failwith "NYI3"
-
+    | Funcall (fid, argexprs) ->
+        match (fid, argexprs) with
+        | ("date", onearg::[]) -> 
+            let farg = evalRowT CValueType.DateTime onearg
+            match farg with
+            | Date d -> CValue.String(d.Date.ToString("yyyy-MM-dd"))
+            | _ -> failwith "date function with non date arg"
+        | _ -> failwith "NYI4"
+ 
 
 let evalRowAsBool expr row =
     let cval = evalRow expr row
@@ -81,3 +88,17 @@ let filterWithExpr expr df =
     df |> Frame.filterRowValues (fun row ->
         evalRowAsBool expr row
         )
+
+let evalRowAsString expr row =
+    let cval = evalRow expr row
+    match cval with
+    | CValue.Bool x -> x.ToString()
+    | CValue.Number x -> x.ToString()
+    | CValue.Float x -> x.ToString()
+    | CValue.Date x -> x.ToString()
+    | CValue.String x -> x
+
+
+let mutateWithExpr (assignExpr:Assign) df =
+    let newcolumn = df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
+    df.AddColumn(assignExpr.identifier, newcolumn)

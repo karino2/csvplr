@@ -26,3 +26,10 @@ let excludeExpr = runParse pexpr "pollen != -9999"
 let excluded = filterWithExpr excludeExpr pollenCsv
 excluded.RowCount |> should 257
 
+
+let assignExpr = runParse pAssignment "dtonly=date(date)"
+mutateWithExpr assignExpr pollenCsv
+
+let newcols = pollenCsv.ColumnKeys |> Seq.toArray
+newcols.[3] |> should "dtonly"
+pollenCsv.Rows[0].Get("dtonly") |> should "2022-02-25"

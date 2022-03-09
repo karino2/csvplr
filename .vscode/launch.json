@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/bin/Debug/net6.0/csvplr.dll",
-        "args": ["filter", "pollen != -9999", "<", "${workspaceFolder}/test/test.csv"],
+        "args": ["mutate", "dateonly=date(date)", "<", "${workspaceFolder}/test/test.csv"],
         "cwd": "${workspaceFolder}",
         "stopAtEntry": false,
         "console": "internalConsole"
