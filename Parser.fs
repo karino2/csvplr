@@ -104,3 +104,5 @@ let pAssignment =
     pipe2 (pidentifier .>> (str_ws "=")) pexpr (fun ident expr -> {identifier=ident; rexpr=expr}) 
 
 
+let pvarlist = 
+    (sepBy pidentifier (str_ws ","))

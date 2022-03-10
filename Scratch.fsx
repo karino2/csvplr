@@ -138,3 +138,58 @@ runParse pAssignment "day=day(date)"
 
 pollenCsv.SaveCsv("test/test_with_ymd.csv", includeRowKeys=false)
 
+pollenCsv.ColumnTypes
+
+pollenCsv.ColumnTypes |> Seq.map (fun tp->tp.ToString())
+pollenCsv.GetColumn "pollen"
+
+
+pollenCsv?year.[0]
+
+Console.WriteLine("{0}", (float 3))
+
+printfn "%O" (float 3)
+printfn "%O" (float 3.1)
+
+3.1 = 3.1
+
+(float 3)
+
+let varlist = runParse pvarlist "year,month,day"
+
+varlist |> String.concat "!" |> sprintf "!%s!"
+
+
+
+let split_to_list (enclosed:string) =
+    enclosed.Substring(1, enclosed.Length-2).Split("!")
+
+toGroupByColumnName varlist
+
+let cells = pollenCsv.Rows.[0].GetItems(["year"; "month"])
+
+
+
+pollenCsv |> Frame.mapRowValues (fun row-> rowToGroupByCell varlist row)
+
+groupBy varlist pollenCsv
+pollenCsv
+
+split_to_list "!2022!2!25!"
+
+
+"!2022!2!25!".Substring(1, )
+
+"!2022!2!25!".Split("!").[1..]
+
+
+pollenCsv.Rows.[0].GetAs<string>("year")
+
+
+cells.GetAllValues |> String.concat "!"
+
+
+.Select("year", "month")
+
+ df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
+

@@ -115,3 +115,21 @@ let evalRowAsString expr row =
 let mutateWithExpr (assignExpr:Assign) df =
     let newcolumn = df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
     df.AddColumn(assignExpr.identifier, newcolumn)
+
+
+let groupby_special_key = "csvplr_group_by_zzz"
+
+let encloseWithSep (strlist: string list) =
+    strlist |> String.concat "!" |> sprintf "!%s!"
+
+let toGroupByColumnName (varlist: string list) =
+    groupby_special_key::varlist |> encloseWithSep
+
+let rowToGroupByCell varlist (row:ObjectSeries<'T>) =
+    varlist |> List.map (fun key -> row.GetAs<string> key) |> encloseWithSep
+
+let groupBy varlist df =
+    let newcols = df |> Frame.mapRowValues (fun row-> rowToGroupByCell varlist row)
+    let newcolname = toGroupByColumnName varlist
+    df.AddColumn(newcolname, newcols)
+
