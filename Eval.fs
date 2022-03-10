@@ -133,3 +133,54 @@ let groupBy varlist df =
     let newcolname = toGroupByColumnName varlist
     df.AddColumn(newcolname, newcols)
 
+//
+// summarise
+//
+
+let splitToList (enclosed:string) =
+    enclosed.Substring(1, enclosed.Length-2).Split("!")
+
+// GB = GroupBy, ColumnName = CN
+let findGBCN (df:Frame<int, string>) =
+    df.ColumnKeys |> Seq.tryFind (fun key -> key.StartsWith "!csvplr_group_by_zzz!")
+
+
+let GBCN2CNs colname =  
+    splitToList colname |> (fun arr->arr[1..])
+
+let doGroupBy gbcn df =
+    df |> Frame.groupRowsByString gbcn |> Frame.nest
+
+let aggregate targetname aggrfun (gbdf:Series<string, Frame<int, string>>) =
+    gbdf |> Series.mapValues (fun m ->
+                 m.GetColumn<float>(targetname)
+                |> aggrfun |> sprintf "%O")
+
+// retrun keycolArr
+let recoverKeyCol cols gbdf =
+    let keyarrcols = gbdf |> Series.map (fun k _-> splitToList k)
+    cols |> Array.mapi (fun i _-> keyarrcols |> Series.mapValues (fun m->m.[i]))
+
+let recoverDf newname aggrcol gbcols gbdf =
+    let keycolArr = recoverKeyCol gbcols gbdf
+    let colnames = Array.append gbcols [|newname|]
+    let colvals = Array.append keycolArr [|aggrcol|] 
+
+    Array.zip colnames colvals
+    |> Frame.ofColumns
+
+let summarise (expr:Assign) df =
+    let newname = expr.identifier
+    match expr.rexpr with
+    | Funcall ("sum", onearg::[]) -> 
+        match onearg with
+        | (Atom (Variable vname)) ->
+            match (findGBCN df) with
+            | (Some gbcn) ->
+                let gcols = GBCN2CNs gbcn
+                let gbdf = doGroupBy gbcn df
+                let aggrcol = aggregate vname Stats.sum gbdf
+                recoverDf newname aggrcol gcols gbdf
+            | _ -> failwith "NYI3, sumarise with no grouping"
+        | _ -> failwith "NYI2"
+    | _ -> failwith "NYI"

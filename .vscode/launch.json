@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/bin/Debug/net6.0/csvplr.dll",
-        "args": ["group_by", "year, month", "<", "${workspaceFolder}/test/test_with_ymd.csv"],
+        "args": ["summarise", "perday=sum(pollen)", "<", "${workspaceFolder}/test/test_groupby.csv"],
         "cwd": "${workspaceFolder}",
         "stopAtEntry": false,
         "console": "internalConsole"

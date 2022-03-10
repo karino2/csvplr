@@ -161,8 +161,6 @@ varlist |> String.concat "!" |> sprintf "!%s!"
 
 
 
-let split_to_list (enclosed:string) =
-    enclosed.Substring(1, enclosed.Length-2).Split("!")
 
 toGroupByColumnName varlist
 
@@ -175,7 +173,142 @@ pollenCsv |> Frame.mapRowValues (fun row-> rowToGroupByCell varlist row)
 groupBy varlist pollenCsv
 pollenCsv
 
-split_to_list "!2022!2!25!"
+splitToList "!2022!2!25!"
+
+
+let ymdCsv = Frame.ReadCsv "test/test_with_ymd.csv"
+groupBy ["year"; "month"; "day"] ymdCsv
+ymdCsv
+ymdCsv.SaveCsv("test/test_groupby.csv", includeRowKeys=false)
+
+ymdCsv.ColumnKeys |> Seq.tryFind (fun key -> key.StartsWith "!csvplr_group_by_zzz!")
+
+
+
+
+
+let (Some target2) = findGBCN ymdCsv
+
+let cols = GBCN2CNs target2
+
+let gbcsv = ymdCsv
+
+let bygb2 = doGroupBy target2 gbcsv
+
+let aggrcol = aggregate "pollen" Stats.sum bygb2
+
+
+recoverDf "pollen" aggrcol cols bygb2
+
+
+let keycolArr = recoverKeyCol cols bygb2
+let colnames2 = Array.append cols [|"pollen"|]
+let colvals2 = Array.append keycolArr [|aggrcol|] 
+
+Array.zip colnames2 colvals2
+|> Frame.ofColumns
+
+
+
+let gb = gbcsv |> Frame.groupRowsByString target2
+
+// let gb = gbcsv.GroupRowsUsing (fun _ row-> row.GetAs<string>(target2))
+
+gb.ColumnKeys
+gb.RowKeys
+
+let bygb = gb |> Frame.nest
+
+bygb.Get("!2022!3!4!").GetColumn<float>("pollen") |> Stats.sum
+bygb.Get("!2022!3!5!").GetColumn<float>("pollen") |> Stats.sum
+bygb.Get("!2022!3!6!").GetColumn<float>("pollen") |> Stats.mean
+
+bygb.Keys
+
+
+let collist = cols |> Array.toList
+collist.Tail
+
+"abc"::collist
+
+Array.append
+
+let pymd = bygb |> Series.map (fun k m->
+     let aggr = m.GetColumn<float>("pollen") |> Stats.sum |> sprintf "%O"
+     let ymd = splitToList k |> Array.toList
+     aggr::ymd
+     )
+
+pymd
+
+
+
+
+
+let colnames = Array.append cols [|"pollen"|]
+let colvals = Array.append ymdcolArr [|polcol|] 
+
+Array.zip colnames colvals 
+|> Frame.ofColumns
+
+
+let polcol = bygb |> Series.mapValues (fun m -> m.GetColumn<float>("pollen") |> Stats.sum |> sprintf "%O")
+let ymdlistCol = bygb |> Series.map (fun k _-> splitToList k)
+let ycol = ymdlistCol |> Series.mapValues (fun m->m.[0])
+let mcol = ymdlistCol |> Series.mapValues (fun m->m.[1])
+let dcol = ymdlistCol |> Series.mapValues (fun m->m.[2])
+
+ymdlistCol.GetAt(0)
+
+let test = ["a"; "b"]
+List.append test ["c"]
+
+Array.append [|"a"; "b"|] [|"c"|]
+
+let ymdcolArr = cols |> Array.mapi (fun i _-> ymdlistCol |> Series.mapValues (fun m->m.[i]))
+
+(Series<string, 'T>)
+
+
+
+
+Array.append ymdcolArr [|polcol|]
+
+
+
+
+let hoge = [ycol; mcol; dcol; polcol]
+
+Frame(["year"; "month"; "day"; "pollen"], [ycol; mcol; dcol; polcol])
+
+
+
+let hoge3 = ["year"=> ycol; "month" => mcol]
+
+Frame.ofColumns hoge3
+
+
+Frame(["year"; "month"; "day"; "pollen"], hoge)
+
+Frame(colnames, colvals)
+
+
+Frame( (Array.append cols [|"pollen"|]), (Array.append ymdcolArr [|polcol|]))
+
+
+gb
+|> Frame.mapRows (fun rowkey row-> 1)
+
+gb.GetColumn<float>("pollen")
+|> Series.mapValues (fun t)
+
+
+gb.GetColumn<float>("pollen")
+|> Series.mapValues (Stats.sum fst)
+
+let target = toGroupByColumnName ["year"; "month"; "day"]
+
+target.StartsWith "!csvplr_group_by_zzz!"
 
 
 "!2022!2!25!".Substring(1, )

@@ -11,6 +11,7 @@ type CliArguments =
     | [<CliPrefix(CliPrefix.None)>] Filter of expr:string
     | [<CliPrefix(CliPrefix.None)>] Mutate of expr:string
     | [<CliPrefix(CliPrefix.None); AltCommandLine("group_by")>] Group_By of expr:string
+    | [<CliPrefix(CliPrefix.None)>] Summarise of expr:string
     | [<CliPrefix(CliPrefix.None)>] Dump
 
     interface IArgParserTemplate with
@@ -20,6 +21,7 @@ type CliArguments =
             | Filter _ -> "Filter with expression."
             | Mutate _ -> "Mutate with expression."
             | Group_By _ -> "Group-By with column list."
+            | Summarise _ -> "Summarise with expression. Do after group_by."
             | Dump -> "Read csv from stdin and dump"
 
 
@@ -57,6 +59,14 @@ let main argv =
                 let csv = Frame.ReadCsv Console.In
                 groupBy varlist csv
                 csv.SaveCsv(Console.Out, includeRowKeys=false)
+            | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
+        elif (results.Contains Summarise) then
+            let exprArg = results.GetResult(Summarise)
+            match run pAssignment exprArg with
+            | Success(expr, _, _)  ->
+                let csv = Frame.ReadCsv Console.In
+                let newCsv = summarise expr csv
+                newCsv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
         elif (results.Contains Dump) then
             let csv = Frame.ReadCsv Console.In

@@ -33,3 +33,9 @@ mutateWithExpr assignExpr pollenCsv
 let newcols = pollenCsv.ColumnKeys |> Seq.toArray
 newcols.[3] |> should "dtonly"
 pollenCsv.Rows[0].Get("dtonly") |> should "2022-02-25"
+
+
+let gbcsv = Frame.ReadCsv "./test/test_groupby.csv"
+
+let assignExpr2 = runParse pAssignment "perday=sum(pollen)"
+summarise assignExpr2 gbcsv
