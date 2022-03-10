@@ -10,7 +10,7 @@ type CliArguments =
     | [<CliPrefix(CliPrefix.None)>] Load of path:string
     | [<CliPrefix(CliPrefix.None)>] Filter of expr:string
     | [<CliPrefix(CliPrefix.None)>] Mutate of expr:string
-    | [<CliPrefix(CliPrefix.None)>] Group_By of expr:string
+    | [<CliPrefix(CliPrefix.None); AltCommandLine("group_by")>] Group_By of expr:string
     | [<CliPrefix(CliPrefix.None)>] Dump
 
     interface IArgParserTemplate with
