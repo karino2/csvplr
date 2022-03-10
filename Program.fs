@@ -28,18 +28,24 @@ type CliArguments =
 [<EntryPoint>]
 let main argv =
 
+    let loadCsv path =
+        Frame.ReadCsv(path, inferTypes=false)
+
+    let readCsv () =
+        Frame.ReadCsv(Console.In, inferTypes=false)
+
     let parser = ArgumentParser.Create<CliArguments>(programName = "csvplr")
     try
         let results = parser.ParseCommandLine(inputs = argv, raiseOnUsage = true)
         if (results.Contains Load) then
             let path = results.GetResult(Load)
-            let csv = Frame.ReadCsv path
+            let csv = loadCsv path
             csv.Print()
         elif (results.Contains Filter) then
             let exprArg = results.GetResult(Filter)
             match run pexpr exprArg with
             | Success(expr, _, _)  ->
-                let csv = Frame.ReadCsv Console.In
+                let csv = readCsv () 
                           |> filterWithExpr expr
                 csv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
@@ -48,7 +54,7 @@ let main argv =
             let exprArg = results.GetResult(Mutate)
             match run pAssignment exprArg with
             | Success(expr, _, _)  ->
-                let csv = Frame.ReadCsv Console.In
+                let csv = readCsv ()
                 mutateWithExpr expr csv
                 csv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
@@ -56,7 +62,7 @@ let main argv =
             let exprArg = results.GetResult(Group_By)
             match run pvarlist exprArg with
             | Success(varlist, _, _)  ->
-                let csv = Frame.ReadCsv Console.In
+                let csv = readCsv ()
                 groupBy varlist csv
                 csv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
@@ -64,12 +70,12 @@ let main argv =
             let exprArg = results.GetResult(Summarise)
             match run pAssignment exprArg with
             | Success(expr, _, _)  ->
-                let csv = Frame.ReadCsv Console.In
+                let csv = readCsv ()
                 let newCsv = summarise expr csv
                 newCsv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
         elif (results.Contains Dump) then
-            let csv = Frame.ReadCsv Console.In
+            let csv = readCsv ()
             csv.SaveCsv(Console.Out, includeRowKeys=false)
             // csv.Print()
         0

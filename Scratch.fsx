@@ -173,6 +173,11 @@ pollenCsv |> Frame.mapRowValues (fun row-> rowToGroupByCell varlist row)
 groupBy varlist pollenCsv
 pollenCsv
 
+
+let noinfer = Frame.ReadCsv("/Users/arinokazuma/Downloads/pollen_14208_20220225_20220307.csv", inferTypes=false) 
+noinfer.GetColumn<DateTime>("date")
+
+
 splitToList "!2022!2!25!"
 
 
