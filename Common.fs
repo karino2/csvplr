@@ -27,6 +27,10 @@ type Atom =
 type BinOpType = 
 | EqOp
 | NeqOp
+| GtOp
+| GeOp
+| LtOp
+| LeOp
 
 type Rexpr =
 | Atom of Atom

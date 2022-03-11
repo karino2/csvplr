@@ -2,6 +2,7 @@ module TestUtils
 
 open System
 open FParsec
+open Eval
 
 type CsvplrException(message) = inherit Exception(message)
 
@@ -28,3 +29,9 @@ let runParse p str =
     | Success(result, _, _)   ->
         result
     | Failure(errorMsg, _, _) -> raise (CsvplrException (sprintf "Parse fail: %s" errorMsg))
+
+let mutateDf df expr =
+    mutateWithExpr expr df
+
+let filterDf df expr =
+    filterWithExpr expr df

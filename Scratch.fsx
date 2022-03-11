@@ -2,10 +2,19 @@
 
 #load "Deedle.fsx"
 
+#r "nuget: FParsec"
+open FParsec
+
+#load "Common.fs"
+open Common
+
+#load "Parser.fs"
+open Parser
+
 open System
 open Deedle
 
-let pollenCsv = Frame.ReadCsv "/Users/arinokazuma/Downloads/pollen_14208_20220225_20220307.csv"
+let pollenCsv = Frame.ReadCsv "test/test.csv"
 
 pollenCsv
 
@@ -76,18 +85,9 @@ pollenCsv?dateonly <- pollenCsv?date
 
 // Parser
 
-#r "nuget: FParsec"
-open FParsec
-
-#load "Common.fs"
-open Common
-
-#load "Parser.fs"
-open Parser
-
 let test p str =
     match run p str with
-    | Success(result, _, _)   -> printfn "Success: %A" result
+    | ParserResult.Success(result, _, _)   -> printfn "Success: %A" result
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
 
@@ -98,23 +98,37 @@ test pexpr "123.0"
 
 test pexpr "pollen != -9999"
 
+test pexpr "pollen == \"2022-03-08\""
+test pexpr "pollen >= \"2022-03-08\""
+test pexpr "pollen > \"2022-03-08\""
+test pexpr "pollen <= \"2022-03-08\""
+test pexpr "pollen < \"2022-03-08\""
+
+
 test pfloat "123"
 
 #load "Eval.fs"
 open Eval
 
-let eval p str = 
+let evalFilter df p str = 
     match run p str with
-    | Success(result, _, _)   ->
+    | ParserResult.Success(result, _, _)   ->
         printfn "Success: %A" result
-        let res = filterWithExpr result pollenCsv
+        let res = filterWithExpr result df
         res.Print()
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
 
-eval pexpr "pollen != -9999"
+evalFilter pollenCsv pexpr "pollen != -9999"
 
-eval pexpr "pollen == 7"
+evalFilter pollenCsv pexpr "pollen == 7"
+
+
+
+let ymdCsv = Frame.ReadCsv("test/test_with_ymd.csv", inferTypes=false) 
+evalFilter ymdCsv pexpr "dtonly == \"2022-03-07\""
+evalFilter ymdCsv pexpr "dtonly >= \"2022-03-06\""
+
 
 
 #load "TestUtils.fs"
@@ -124,8 +138,9 @@ let funcall = runParse pexpr "date(date)"
 
 evalRow funcall pollenCsv.Rows[0]
 
-let mutateDf df expr =
-    mutateWithExpr expr df
+
+runParse pAssignment "dtonly=date(date)"
+|> mutateDf pollenCsv
 
 runParse pAssignment "year=year(date)"
 |> mutateDf pollenCsv

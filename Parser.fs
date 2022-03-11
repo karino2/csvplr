@@ -98,6 +98,10 @@ opp.TermParser <- (attempt (pipe2 pidentifier pargs (fun funid args -> Funcall (
 
 opp.AddOperator(InfixOperator("==", ws, 1, Associativity.Left, fun x y -> BinOp (EqOp, x, y)))
 opp.AddOperator(InfixOperator("!=", ws, 1, Associativity.Left, fun x y -> BinOp (NeqOp, x, y)))
+opp.AddOperator(InfixOperator(">=", ws, 1, Associativity.Left, fun x y -> BinOp (GeOp, x, y)))
+opp.AddOperator(InfixOperator("<=", ws, 1, Associativity.Left, fun x y -> BinOp (LeOp, x, y)))
+opp.AddOperator(InfixOperator(">", ws, 1, Associativity.Left, fun x y -> BinOp (GtOp, x, y)))
+opp.AddOperator(InfixOperator("<", ws, 1, Associativity.Left, fun x y -> BinOp (LtOp, x, y)))
 
 
 let pAssignment =

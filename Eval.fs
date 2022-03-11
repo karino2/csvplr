@@ -56,6 +56,10 @@ let evalRow (expr:Rexpr) row =
             match optype with
             | EqOp -> CValue.Bool (larg = rarg)
             | NeqOp -> CValue.Bool (larg <> rarg)
+            | LtOp -> CValue.Bool (larg < rarg)
+            | LeOp -> CValue.Bool (larg <= rarg)
+            | GtOp -> CValue.Bool (larg > rarg)
+            | GeOp -> CValue.Bool (larg >= rarg)
         | Atom a ->
             evalAtom valtype a row
         | _ -> failwith "NYI3"

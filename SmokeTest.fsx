@@ -22,18 +22,22 @@ let pollenCsv = Frame.ReadCsv "./test/test.csv"
 pollenCsv.RowCount |> should 264
 
 
-let excludeExpr = runParse pexpr "pollen != -9999"
-let excluded = filterWithExpr excludeExpr pollenCsv
+let excluded = runParse pexpr "pollen != -9999" |> filterDf pollenCsv
 excluded.RowCount |> should 257
 
 
-let assignExpr = runParse pAssignment "dtonly=date(date)"
-mutateWithExpr assignExpr pollenCsv
+runParse pAssignment "dtonly=date(date)"
+|> mutateDf pollenCsv
 
 let newcols = pollenCsv.ColumnKeys |> Seq.toArray
 newcols.[3] |> should "dtonly"
 pollenCsv.Rows[0].Get("dtonly") |> should "2022-02-25"
 
+let filterGt = runParse pexpr "dtonly > \"2022-03-06\"" |> filterDf pollenCsv
+filterGt.RowCount |> should 24
+
+let filterGe = runParse pexpr "dtonly >= \"2022-03-06\"" |> filterDf pollenCsv
+filterGe.RowCount |> should 48
 
 let gbcsv = Frame.ReadCsv "./test/test_groupby.csv"
 
