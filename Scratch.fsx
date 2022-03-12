@@ -205,6 +205,18 @@ ymdCsv.ColumnKeys |> Seq.tryFind (fun key -> key.StartsWith "!csvplr_group_by_zz
 
 
 
+(Set.ofList ["year"; "month"]) |> Seq.contains "year"
+
+let cols = ["year"; "month"; "pollen"]
+ymdCsv.Columns[cols]
+
+
+ymdCsv |> Frame.filterCols (fun col vals-> ["year"; "day"; "pollen"] |> List.contains col)
+
+
+ymdCsv.SelectColumnKeys (fun col -> col.Key = "year" )
+
+ymdCsv.Select (fun rowkey ckey cols -> ["year"; "month"] |> List.contains ckey)
 
 
 let (Some target2) = findGBCN ymdCsv
