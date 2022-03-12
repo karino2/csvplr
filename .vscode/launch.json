@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/bin/Debug/net6.0/csvplr.dll",
-        "args": ["select", "date, pollen", "<", "${workspaceFolder}/test/test.csv"],
+        "args": ["mutate", "mdh=paste0(month(date), \"-\", day(date), \" \", hour(date), \":00\")", "<", "${workspaceFolder}/test/test.csv"],
         "cwd": "${workspaceFolder}",
         "stopAtEntry": false,
         "console": "internalConsole"

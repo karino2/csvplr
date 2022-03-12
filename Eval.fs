@@ -43,7 +43,7 @@ let evalAtom (valtype:CValueType) (x:Atom) row =
     | Variable varname ->  evalVariable valtype varname row
 
 
-let evalRow (expr:Rexpr) row =
+let rec evalRow (expr:Rexpr) row =
 
     let rec evalRowT valtype (expr:Rexpr) : CValue =
         match expr with
@@ -78,6 +78,15 @@ let evalRow (expr:Rexpr) row =
             | Date d -> d
             | _ -> failwith "date related function with non date arg"
 
+        let evalAsString arg =
+            let farg = evalRow arg row
+            match farg with
+            | CValue.Number n -> sprintf "%O" n
+            | CValue.Float n -> sprintf "%O" n
+            | CValue.Bool n -> sprintf "%O" n
+            | CValue.String n -> n
+            | _ -> failwith "evalAsString with unknown type. Never reached here."
+
         match (fid, argexprs) with
         | ("date", onearg::[]) -> 
             let d = evalAsDate onearg
@@ -91,7 +100,15 @@ let evalRow (expr:Rexpr) row =
         | ("day", onearg::[]) -> 
             let d = evalAsDate onearg
             CValue.String(d.Day.ToString())
-        | _ -> failwith "NYI4"
+        | ("hour", onearg::[]) -> 
+            let d = evalAsDate onearg
+            CValue.String(d.Hour.ToString())
+        | ("minute", onearg::[]) -> 
+            let d = evalAsDate onearg
+            CValue.String(d.Minute.ToString())
+        | ("paste0", _) ->
+            argexprs |> List.map evalAsString |> String.concat "" |> CValue.String
+        | _ -> failwithf "NYI4, %A" fid
  
 
 let evalRowAsBool expr row =

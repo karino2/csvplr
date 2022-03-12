@@ -158,6 +158,16 @@ pollenCsv.ColumnTypes
 pollenCsv.ColumnTypes |> Seq.map (fun tp->tp.ToString())
 pollenCsv.GetColumn "pollen"
 
+runParse pAssignment "yd=paste0(year(date), \"-\", day(date))"
+|> mutateDf pollenCsv
+
+pollenCsv
+
+DateTime.Now.ToString("YYYY-DD")
+
+DateTime.Now.
+
+DateTime.Now.Minute
 
 pollenCsv?year.[0]
 
@@ -301,8 +311,12 @@ let ymdcolArr = cols |> Array.mapi (fun i _-> ymdlistCol |> Series.mapValues (fu
 
 (Series<string, 'T>)
 
+sprintf "%O" 1.0
+sprintf "%O" 1
+sprintf "%O" true
+sprintf "%O" false
 
-
+["ab"; "cde"; "fg"] |> String.concat ""
 
 Array.append ymdcolArr [|polcol|]
 
