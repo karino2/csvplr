@@ -120,6 +120,9 @@ let mutateWithExpr (assignExpr:Assign) df =
     let newcolumn = df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
     df.AddColumn(assignExpr.identifier, newcolumn)
 
+//
+// group by
+//
 
 let groupby_special_key = "csvplr_group_by_zzz"
 
