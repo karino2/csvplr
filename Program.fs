@@ -57,10 +57,10 @@ let main argv =
 
         elif (results.Contains Mutate) then
             let exprArg = results.GetResult(Mutate)
-            match run pAssignment exprArg with
-            | Success(expr, _, _)  ->
+            match run pAssignList exprArg with
+            | Success(assignList, _, _)  ->
                 let csv = readCsv ()
-                mutateWithExpr expr csv
+                mutateWithExpr assignList csv
                 csv.SaveCsv(Console.Out, includeRowKeys=false)
             | Failure(errorMsg, _, _) -> failwithf "Failure: %s" errorMsg
         elif (results.Contains Group_By) then

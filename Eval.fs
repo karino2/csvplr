@@ -178,9 +178,12 @@ let evalRowAsString expr row =
     | CValue.Missing -> ""
 
 
-let mutateWithExpr (assignExpr:Assign) df =
-    let newcolumn = df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
-    df.AddColumn(assignExpr.identifier, newcolumn)
+let mutateWithExpr (assignList:Assign list) df =
+    assignList |> List.iter (fun assignExpr->
+        let newcolumn = df |> Frame.mapRowValues (fun row-> evalRowAsString assignExpr.rexpr row)
+        df.AddColumn(assignExpr.identifier, newcolumn)
+    )
+
 
 //
 // group by

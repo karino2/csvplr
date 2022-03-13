@@ -108,6 +108,8 @@ opp.AddOperator(PrefixOperator("!", ws, 2, true, fun x-> UnaryOp (NotOp, x)))
 let pAssignment =
     pipe2 (pidentifier .>> (str_ws "=")) pexpr (fun ident expr -> {identifier=ident; rexpr=expr}) 
 
+let pAssignList =
+    (sepBy pAssignment (str_ws ","))
 
 let pvarlist = 
     (sepBy pidentifier (str_ws ","))

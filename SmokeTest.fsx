@@ -26,8 +26,16 @@ let excluded = runParse pexpr "pollen != -9999" |> filterDf pollenCsv
 excluded.RowCount |> should 257
 
 
-runParse pAssignment "dtonly=date(date)"
+runParse pAssignList "dtonly=date(date)"
 |> mutateDf pollenCsv
+
+pollenCsv.ColumnKeys |> Seq.contains "dtonly" |> should true
+
+runParse pAssignList "year=year(date), month=month(date)"
+|> mutateDf pollenCsv
+
+pollenCsv.ColumnKeys |> Seq.contains "year" |> should true
+pollenCsv.ColumnKeys |> Seq.contains "month" |> should true
 
 let newcols = pollenCsv.ColumnKeys |> Seq.toArray
 newcols.[3] |> should "dtonly"
