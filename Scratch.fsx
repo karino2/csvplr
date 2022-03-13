@@ -118,6 +118,9 @@ test pexpr "pollen <= \"2022-03-08\""
 test pexpr "pollen < \"2022-03-08\""
 
 
+test pAssignList "year=year(date), month=month(date)"
+
+
 test pfloat "123"
 
 #load "Eval.fs"
