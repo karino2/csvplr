@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/bin/Debug/net6.0/csvplr.dll",
-        "args": ["filter", "is.na(pollen)", "<", "${workspaceFolder}/test/test_groupby_na.csv"],
+        "args": ["filter", "pollen > 0", "<", "${workspaceFolder}/test/test_groupby_na.csv"],
         "cwd": "${workspaceFolder}",
         "stopAtEntry": false,
         "console": "internalConsole"

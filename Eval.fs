@@ -30,8 +30,16 @@ let resolveType ltp rtyp =
 
 let evalVariable (valtype:CValueType) varname (row:ObjectSeries<'T>) =
     match valtype with
-    | CValueType.Number -> CValue.Number (row.GetAs<int>(varname))
-    | CValueType.Float ->CValue.Float  (row.GetAs<float>(varname))
+    | CValueType.Number ->
+        try
+            CValue.Number (row.GetAs<int>(varname))
+        with
+        | _ -> Missing
+    | CValueType.Float ->
+        try
+            CValue.Float  (row.GetAs<float>(varname))
+        with
+        | _ -> Missing
     | CValueType.Bool -> CValue.Bool (row.GetAs<bool>(varname))
     | CValueType.String -> CValue.String (row.GetAs<string>(varname))
     | CValueType.DateTime -> CValue.Date (row.GetAs<DateTime>(varname))
@@ -59,13 +67,17 @@ let rec evalRow (expr:Rexpr) row =
             let argtype = resolveType ltype rtype
             let larg = evalRowT argtype lop
             let rarg = evalRowT argtype rop
-            match optype with
-            | EqOp -> CValue.Bool (larg = rarg)
-            | NeqOp -> CValue.Bool (larg <> rarg)
-            | LtOp -> CValue.Bool (larg < rarg)
-            | LeOp -> CValue.Bool (larg <= rarg)
-            | GtOp -> CValue.Bool (larg > rarg)
-            | GeOp -> CValue.Bool (larg >= rarg)
+            match larg, rarg with
+            | Missing, _ -> CValue.Missing
+            | _, Missing -> CValue.Missing
+            | _, _ -> 
+                match optype with
+                | EqOp -> CValue.Bool (larg = rarg)
+                | NeqOp -> CValue.Bool (larg <> rarg)
+                | LtOp -> CValue.Bool (larg < rarg)
+                | LeOp -> CValue.Bool (larg <= rarg)
+                | GtOp -> CValue.Bool (larg > rarg)
+                | GeOp -> CValue.Bool (larg >= rarg)
         | Atom a ->
             evalAtom valtype a row
         | _ -> failwith "NYI3"
@@ -82,6 +94,7 @@ let rec evalRow (expr:Rexpr) row =
             | CValue.Float n -> if n = 0 then false else true 
             | CValue.Bool n -> n
             | CValue.String n -> if n = "" then false else true
+            | CValue.Missing -> failwith "NYI of missing value of !"
             | _ -> failwith "evalAsBool with unknown type. Never reached here."
 
 
@@ -142,16 +155,16 @@ let rec evalRow (expr:Rexpr) row =
         | _ -> failwithf "NYI4, %A" fid
  
 
-let evalRowAsBool expr row =
+let evalRowAsBoolForFilter expr row =
     let cval = evalRow expr row
     match cval with
     | CValue.Bool b -> b
+    | CValue.Missing -> false
     | _ -> failwith "Non bool type in evalRowAsBool"
 
 let filterWithExpr expr df =
-    // pollenCsv.Rows |> Series.filterValues (fun row -> row?pollen <> -9999 )
     df |> Frame.filterRowValues (fun row ->
-        evalRowAsBool expr row
+        evalRowAsBoolForFilter expr row
         )
 
 let evalRowAsString expr row =
@@ -162,6 +175,7 @@ let evalRowAsString expr row =
     | CValue.Float x -> x.ToString()
     | CValue.Date x -> x.ToString()
     | CValue.String x -> x
+    | CValue.Missing -> ""
 
 
 let mutateWithExpr (assignExpr:Assign) df =

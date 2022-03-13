@@ -15,7 +15,7 @@ type CValue =
 | Bool of bool
 | String of string
 | Date of DateTime
-
+| Missing
 
 type Atom =
 | String of string

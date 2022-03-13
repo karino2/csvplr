@@ -58,3 +58,10 @@ runParse pexpr "is.na(pollen)"
 runParse pexpr "!is.na(pollen)"
 |> filterDf gbcsv_na |> countRow |> should 240 
 
+// filter for na is always filter-out.
+runParse pexpr "pollen < 9999"
+|> filterDf gbcsv_na |> countRow |> should 240
+
+// filter for na is always filter-out.
+runParse pexpr "pollen > -9999"
+|> filterDf gbcsv_na |> countRow |> should 240
