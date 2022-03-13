@@ -13,6 +13,7 @@ let guessType (expr:Rexpr) =
         | Float _ -> Some CValueType.Float
         | Variable _ -> None
     | BinOp _ -> Some CValueType.Number // bool, 
+    | UnaryOp (NotOp, _) -> Some CValueType.Bool 
     | Funcall (fname, _) -> 
         match fname with
         | "date" -> Some CValueType.String
