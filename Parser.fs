@@ -9,7 +9,7 @@ let str_ws s = pstring s .>> ws
 
 let pidentifier =
     let isIdentifierFirstChar c = isLetter c || c = '_' || c = '$'
-    let isIdentifierChar c = isLetter c || isDigit c || c = '_'
+    let isIdentifierChar c = isLetter c || isDigit c || c = '_' || c = '.'
 
     many1Satisfy2L isIdentifierFirstChar isIdentifierChar "identifier"
     .>> ws // skips trailing whitespace
@@ -102,6 +102,7 @@ opp.AddOperator(InfixOperator(">=", ws, 1, Associativity.Left, fun x y -> BinOp 
 opp.AddOperator(InfixOperator("<=", ws, 1, Associativity.Left, fun x y -> BinOp (LeOp, x, y)))
 opp.AddOperator(InfixOperator(">", ws, 1, Associativity.Left, fun x y -> BinOp (GtOp, x, y)))
 opp.AddOperator(InfixOperator("<", ws, 1, Associativity.Left, fun x y -> BinOp (LtOp, x, y)))
+opp.AddOperator(PrefixOperator("!", ws, 2, true, fun x-> UnaryOp (NotOp, x)))
 
 
 let pAssignment =

@@ -16,6 +16,7 @@ let guessType (expr:Rexpr) =
     | Funcall (fname, _) -> 
         match fname with
         | "date" -> Some CValueType.String
+        | "is.na" -> Some CValueType.Bool
         | _ -> None
 
 let resolveType ltp rtyp =
@@ -42,6 +43,10 @@ let evalAtom (valtype:CValueType) (x:Atom) row =
     | String n -> CValue.String n
     | Variable varname ->  evalVariable valtype varname row
 
+let str2float (s:string) =
+    match System.Double.TryParse s with
+    | (true, v) -> v
+    | _ -> nan
 
 let rec evalRow (expr:Rexpr) row =
 
@@ -68,6 +73,19 @@ let rec evalRow (expr:Rexpr) row =
     | BinOp _ ->
         // valtype not used in this case.
         evalRowT CValueType.Bool expr
+    | UnaryOp (NotOp, expr) ->
+        let evalAsBool arg =
+            let farg = evalRow arg row
+            match farg with
+            | CValue.Number n -> if n = 0 then false else true
+            | CValue.Float n -> if n = 0 then false else true 
+            | CValue.Bool n -> n
+            | CValue.String n -> if n = "" then false else true
+            | _ -> failwith "evalAsBool with unknown type. Never reached here."
+
+
+        let argval = evalAsBool expr
+        CValue.Bool (not argval)
     | Atom _ ->
         // No type information, if this is variable, treat as string.
         evalRowT CValueType.String expr
@@ -86,6 +104,15 @@ let rec evalRow (expr:Rexpr) row =
             | CValue.Bool n -> sprintf "%O" n
             | CValue.String n -> n
             | _ -> failwith "evalAsString with unknown type. Never reached here."
+
+        let evalAsFloat arg =
+            let farg = evalRow arg row
+            match farg with
+            | CValue.Number n -> float n
+            | CValue.Float n -> n
+            | CValue.Bool n -> if n then 1 else 0
+            | CValue.String n -> str2float n
+            | _ -> failwith "evalAsFloat with unknown type. Never reached here."
 
         match (fid, argexprs) with
         | ("date", onearg::[]) -> 
@@ -108,6 +135,9 @@ let rec evalRow (expr:Rexpr) row =
             CValue.String(d.Minute.ToString())
         | ("paste0", _) ->
             argexprs |> List.map evalAsString |> String.concat "" |> CValue.String
+        | ("is.na", onearg::[]) -> 
+            let d = evalAsFloat onearg
+            CValue.Bool (System.Double.IsNaN d)
         | _ -> failwithf "NYI4, %A" fid
  
 
@@ -175,13 +205,8 @@ let GBCN2CNs colname =
 let doGroupBy gbcn df =
     df |> Frame.groupRowsByString gbcn |> Frame.nest
 
-let toFloat (s:string) =
-    match System.Double.TryParse s with
-    | (true, v) -> v
-    | _ -> nan
-
 let getFloatCell (row:ObjectSeries<string>) targetname =
-    row.GetAs<string> targetname |> toFloat
+    row.GetAs<string> targetname |> str2float
 
 let number2output (num:float) =
     if System.Double.IsNaN(num) then

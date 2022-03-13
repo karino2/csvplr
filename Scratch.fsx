@@ -44,6 +44,11 @@ pollen012?date
 
 DateTime.Now.ToString("yyyy-MM-dd")
 
+123.0 :?> int
+
+(true) :?> int
+
+int true
 
 // add field
 pollenCsv?dateonly <-  pollenCsv |> Frame.mapRowValues (fun row->row.GetAs<DateTime>("date").Date)
@@ -83,6 +88,10 @@ tps.[2].ToString()
 pollenCsv?dateonly <- pollenCsv?date
 
 
+not true
+
+!true
+
 // Parser
 
 let test p str =
@@ -97,6 +106,10 @@ test pexpr "123"
 test pexpr "123.0"
 
 test pexpr "pollen != -9999"
+
+test pexpr "is.na(pollen)"
+test pexpr "!is.na(pollen)"
+
 
 test pexpr "pollen == \"2022-03-08\""
 test pexpr "pollen >= \"2022-03-08\""
@@ -117,36 +130,7 @@ open TestUtils
 
 
 let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
-let tmp = gbcsv_na.GetColumn<string> "pollen"
 
-Series.mapValues (fun k v ->
-    try
-        float v
-    with
-    | _ -> nan
-) tmp |> Stats.sum
-
-gbcsv_na.GetColumn<float> "pollen"
-
-
-
-System.Double.TryParse "123"
-
-sprintf "%O" 123
-sprintf "%O" 123.1
-
-
-let test (num:float) =
-    sprintf "%O" num
-
-test 123
-test 123.1
-
-toFloat "123"
-
-gbcsv_na
-|> Frame.mapRowValues (fun row->row.GetAs<string>("pollen") |> toFloat)
-|> Stats.sum
 
 let evalFilter df p str = 
     match run p str with
@@ -159,8 +143,9 @@ let evalFilter df p str =
 
 evalFilter pollenCsv pexpr "pollen != -9999"
 
-evalFilter pollenCsv pexpr "pollen == 7"
+evalFilter gbcsv_na pexpr "is.na(pollen)"
 
+evalFilter gbcsv_na pexpr "!is.na(pollen)"
 
 
 let ymdCsv = Frame.ReadCsv("test/test_with_ymd.csv", inferTypes=false) 
@@ -168,6 +153,7 @@ evalFilter ymdCsv pexpr "dtonly == \"2022-03-07\""
 evalFilter ymdCsv pexpr "dtonly >= \"2022-03-06\""
 
 
+evalFilter gbcsv_na pexpr "is.na(pollen)"
 
 let funcall = runParse pexpr "date(date)"
 

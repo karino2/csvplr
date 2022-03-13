@@ -46,6 +46,15 @@ summarise assignExpr2 gbcsv
 
 let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
 
+// should no exception.
 runParse pAssignment "perday=sum(pollen)"
-|> summariseDf gbcsv_na
+|> summariseDf gbcsv_na |> ignore
+
+let countRow (df:Frame<int, string>) = df.RowCount
+
+runParse pexpr "is.na(pollen)"
+|> filterDf gbcsv_na |> countRow |> should 24
+
+runParse pexpr "!is.na(pollen)"
+|> filterDf gbcsv_na |> countRow |> should 240 
 

@@ -32,8 +32,13 @@ type BinOpType =
 | LtOp
 | LeOp
 
+type UnaryOpType =
+| NotOp
+
+
 type Rexpr =
 | Atom of Atom
+| UnaryOp of (UnaryOpType * Rexpr)
 | BinOp of (BinOpType * Rexpr * Rexpr)
 | Funcall of (string * Rexpr list)
 
