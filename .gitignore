@@ -1,5 +1,7 @@
 .ionide/
 bin/
 obj/
+work/
 
 .fake
+work/pollen_14108.csv
