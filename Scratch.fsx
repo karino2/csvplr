@@ -110,6 +110,44 @@ test pfloat "123"
 #load "Eval.fs"
 open Eval
 
+
+
+#load "TestUtils.fs"
+open TestUtils
+
+
+let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
+let tmp = gbcsv_na.GetColumn<string> "pollen"
+
+Series.mapValues (fun k v ->
+    try
+        float v
+    with
+    | _ -> nan
+) tmp |> Stats.sum
+
+gbcsv_na.GetColumn<float> "pollen"
+
+
+
+System.Double.TryParse "123"
+
+sprintf "%O" 123
+sprintf "%O" 123.1
+
+
+let test (num:float) =
+    sprintf "%O" num
+
+test 123
+test 123.1
+
+toFloat "123"
+
+gbcsv_na
+|> Frame.mapRowValues (fun row->row.GetAs<string>("pollen") |> toFloat)
+|> Stats.sum
+
 let evalFilter df p str = 
     match run p str with
     | ParserResult.Success(result, _, _)   ->
@@ -130,9 +168,6 @@ evalFilter ymdCsv pexpr "dtonly == \"2022-03-07\""
 evalFilter ymdCsv pexpr "dtonly >= \"2022-03-06\""
 
 
-
-#load "TestUtils.fs"
-open TestUtils
 
 let funcall = runParse pexpr "date(date)"
 

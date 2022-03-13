@@ -43,3 +43,9 @@ let gbcsv = Frame.ReadCsv "./test/test_groupby.csv"
 
 let assignExpr2 = runParse pAssignment "perday=sum(pollen)"
 summarise assignExpr2 gbcsv
+
+let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
+
+runParse pAssignment "perday=sum(pollen)"
+|> summariseDf gbcsv_na
+

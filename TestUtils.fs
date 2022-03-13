@@ -35,3 +35,6 @@ let mutateDf df expr =
 
 let filterDf df expr =
     filterWithExpr expr df
+
+let summariseDf df expr =
+    summarise expr df

@@ -175,10 +175,26 @@ let GBCN2CNs colname =
 let doGroupBy gbcn df =
     df |> Frame.groupRowsByString gbcn |> Frame.nest
 
+let toFloat (s:string) =
+    match System.Double.TryParse s with
+    | (true, v) -> v
+    | _ -> nan
+
+let getFloatCell (row:ObjectSeries<string>) targetname =
+    row.GetAs<string> targetname |> toFloat
+
+let number2output (num:float) =
+    if System.Double.IsNaN(num) then
+        ""
+    else
+        sprintf "%O" num
+
 let aggregate targetname aggrfun (gbdf:Series<string, Frame<int, string>>) =
     gbdf |> Series.mapValues (fun m ->
-                 m.GetColumn<float>(targetname)
-                |> aggrfun |> sprintf "%O")
+            m |> Frame.mapRowValues (fun row ->
+                getFloatCell row targetname
+            ) |> aggrfun |> number2output           
+            )
 
 // retrun keycolArr
 let recoverKeyCol cols gbdf =
