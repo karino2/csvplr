@@ -31,6 +31,8 @@ type BinOpType =
 | GeOp
 | LtOp
 | LeOp
+| AndOp 
+| OrOp
 
 type UnaryOpType =
 | NotOp

@@ -57,6 +57,14 @@ let str2float (s:string) =
     | (true, v) -> v
     | _ -> nan
 
+
+let cvalue2bool cval =
+    match cval with
+    | CValue.Bool b -> b
+    | CValue.Number n -> n <> 0
+    | CValue.String str -> str <> ""
+    | _ -> failwith "cvalue2bool, unsupported type."
+
 let rec evalRow (expr:Rexpr) row =
 
     let rec evalRowT valtype (expr:Rexpr) : CValue =
@@ -78,6 +86,9 @@ let rec evalRow (expr:Rexpr) row =
                 | LeOp -> CValue.Bool (larg <= rarg)
                 | GtOp -> CValue.Bool (larg > rarg)
                 | GeOp -> CValue.Bool (larg >= rarg)
+                | OrOp ->CValue.Bool ((cvalue2bool larg) || (cvalue2bool rarg))
+                | AndOp ->CValue.Bool ((cvalue2bool larg) && (cvalue2bool rarg))
+
         | Atom a ->
             evalAtom valtype a row
         | _ -> failwith "NYI3"

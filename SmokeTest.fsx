@@ -22,9 +22,10 @@ let pollenCsv = Frame.ReadCsv "./test/test.csv"
 pollenCsv.RowCount |> should 264
 
 
-let excluded = runParse pexpr "pollen != -9999" |> filterDf pollenCsv
-excluded.RowCount |> should 257
+runParse pexpr "pollen != -9999" |> filterDf pollenCsv
+|> countRow |> should 257
 
+runParse pexpr "pollen >= 0 && pollen < 10" |> filterDf pollenCsv |> countRow |> should 229
 
 runParse pAssignList "dtonly=date(date)"
 |> mutateDf pollenCsv
@@ -57,8 +58,6 @@ let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
 // should no exception.
 runParse pAssignment "perday=sum(pollen)"
 |> summariseDf gbcsv_na |> ignore
-
-let countRow (df:Frame<int, string>) = df.RowCount
 
 runParse pexpr "is.na(pollen)"
 |> filterDf gbcsv_na |> countRow |> should 24

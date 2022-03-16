@@ -107,6 +107,8 @@ test pexpr "123.0"
 
 test pexpr "pollen != -9999"
 
+test pexpr "pollen > 0 && pollen < 900"
+
 test pexpr "is.na(pollen)"
 test pexpr "!is.na(pollen)"
 

@@ -38,3 +38,5 @@ let filterDf df expr =
 
 let summariseDf df expr =
     summarise expr df
+
+let countRow (df:Deedle.Frame<int, string>) = df.RowCount

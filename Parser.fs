@@ -96,13 +96,15 @@ opp.TermParser <- (attempt (pipe2 pidentifier pargs (fun funid args -> Funcall (
                  <|> pterm_ws
                  <|> between (str_ws "(") (str_ws ")") pexpr
 
-opp.AddOperator(InfixOperator("==", ws, 1, Associativity.Left, fun x y -> BinOp (EqOp, x, y)))
-opp.AddOperator(InfixOperator("!=", ws, 1, Associativity.Left, fun x y -> BinOp (NeqOp, x, y)))
-opp.AddOperator(InfixOperator(">=", ws, 1, Associativity.Left, fun x y -> BinOp (GeOp, x, y)))
-opp.AddOperator(InfixOperator("<=", ws, 1, Associativity.Left, fun x y -> BinOp (LeOp, x, y)))
-opp.AddOperator(InfixOperator(">", ws, 1, Associativity.Left, fun x y -> BinOp (GtOp, x, y)))
-opp.AddOperator(InfixOperator("<", ws, 1, Associativity.Left, fun x y -> BinOp (LtOp, x, y)))
-opp.AddOperator(PrefixOperator("!", ws, 2, true, fun x-> UnaryOp (NotOp, x)))
+opp.AddOperator(InfixOperator("&&", ws, 1, Associativity.Left, fun x y -> BinOp (AndOp, x, y)))
+opp.AddOperator(InfixOperator("||", ws, 1, Associativity.Left, fun x y -> BinOp (OrOp, x, y)))
+opp.AddOperator(InfixOperator("==", ws, 2, Associativity.Left, fun x y -> BinOp (EqOp, x, y)))
+opp.AddOperator(InfixOperator("!=", ws, 2, Associativity.Left, fun x y -> BinOp (NeqOp, x, y)))
+opp.AddOperator(InfixOperator(">=", ws, 2, Associativity.Left, fun x y -> BinOp (GeOp, x, y)))
+opp.AddOperator(InfixOperator("<=", ws, 2, Associativity.Left, fun x y -> BinOp (LeOp, x, y)))
+opp.AddOperator(InfixOperator(">", ws, 2, Associativity.Left, fun x y -> BinOp (GtOp, x, y)))
+opp.AddOperator(InfixOperator("<", ws, 2, Associativity.Left, fun x y -> BinOp (LtOp, x, y)))
+opp.AddOperator(PrefixOperator("!", ws, 3, true, fun x-> UnaryOp (NotOp, x)))
 
 
 let pAssignment =
