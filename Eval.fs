@@ -234,7 +234,7 @@ let GBCN2CNs colname =
 let doGroupBy gbcn df =
     df |> Frame.groupRowsByString gbcn |> Frame.nest
 
-let getFloatCell (row:ObjectSeries<string>) targetname =
+let getFloatCell targetname (row:ObjectSeries<string>) =
     row.GetAs<string> targetname |> str2float
 
 let number2output (num:float) =
@@ -243,12 +243,15 @@ let number2output (num:float) =
     else
         sprintf "%O" num
 
-let aggregate targetname aggrfun (gbdf:Series<string, Frame<int, string>>) =
+
+let aggregate trans aggrfun (gbdf:Series<string, Frame<int, string>>) =
     gbdf |> Series.mapValues (fun m ->
-            m |> Frame.mapRowValues (fun row ->
-                getFloatCell row targetname
-            ) |> aggrfun |> number2output           
+            m |> Frame.mapRowValues trans
+              |> aggrfun |> number2output           
             )
+
+let aggregateNormal targetname aggrfun (gbdf:Series<string, Frame<int, string>>) =
+    aggregate (getFloatCell targetname) aggrfun gbdf
 
 // retrun keycolArr
 let recoverKeyCol cols gbdf =
@@ -265,16 +268,19 @@ let recoverDf newname aggrcol gbcols gbdf =
 
 let summarise (expr:Assign) df =
     let newname = expr.identifier
-    match expr.rexpr with
-    | Funcall ("sum", onearg::[]) -> 
-        match onearg with
-        | (Atom (Variable vname)) ->
-            match (findGBCN df) with
-            | (Some gbcn) ->
-                let gcols = GBCN2CNs gbcn
-                let gbdf = doGroupBy gbcn df
-                let aggrcol = aggregate vname Stats.sum gbdf
+    match (findGBCN df) with
+    | (Some gbcn) ->
+        let gcols = GBCN2CNs gbcn
+        let gbdf = doGroupBy gbcn df
+        match expr.rexpr with
+        | Funcall ("sum", onearg::[]) -> 
+            match onearg with
+            | (Atom (Variable vname)) ->
+                let aggrcol = aggregateNormal vname Stats.sum gbdf
                 recoverDf newname aggrcol gcols gbdf
-            | _ -> failwith "NYI3, sumarise with no grouping"
-        | _ -> failwith "NYI2"
-    | _ -> failwith "NYI"
+            | _ -> failwith "NYI2"
+        | Funcall ("n", []) -> 
+            let aggrcol = aggregate id (fun s-> Stats.count s |> float) gbdf
+            recoverDf newname aggrcol gcols gbdf
+        | _ -> failwith "NYI"
+    | _ -> failwith "NYI3, sumarise with no grouping"

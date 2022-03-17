@@ -61,6 +61,12 @@ runParse pAssignment "perday=sum(pollen)"
 |> should 32
 
 
+runParse pAssignment "count=n()"
+|> summariseDf gbcsv
+|> getColAtRow "count" 1
+|> should 24
+
+
 let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
 
 // should no exception.
