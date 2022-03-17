@@ -50,14 +50,26 @@ filterGe.RowCount |> should 48
 
 let gbcsv = Frame.ReadCsv "./test/test_groupby.csv"
 
-let assignExpr2 = runParse pAssignment "perday=sum(pollen)"
-summarise assignExpr2 gbcsv
+
+let getColAtRow colname rowindex (df:Frame<string, string>) =
+    let row = df.GetRowAt<int> rowindex
+    row.Get colname
+
+runParse pAssignment "perday=sum(pollen)"
+|> summariseDf gbcsv
+|> getColAtRow "perday" 1
+|> should 32
+
 
 let gbcsv_na = Frame.ReadCsv("./test/test_groupby_na.csv", inferTypes=false)
 
 // should no exception.
 runParse pAssignment "perday=sum(pollen)"
-|> summariseDf gbcsv_na |> ignore
+|> summariseDf gbcsv_na
+|> (fun df->
+    df.Rows["!2022!3!7!"].Get "perday")
+|> should ""
+
 
 runParse pexpr "is.na(pollen)"
 |> filterDf gbcsv_na |> countRow |> should 24
